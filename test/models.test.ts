@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { matchesModality, toModelSearchItems } from '../nodes/Hubris/lib/models';
+import { matchesModality, toModelSearchItems, voicesToOptions } from '../nodes/Hubris/lib/models';
+
+describe('voicesToOptions', () => {
+	it('maps voice ids to options', () => {
+		expect(voicesToOptions(['loongjohn', 'longanhuan_v3.6'])).toEqual([
+			{ name: 'loongjohn', value: 'loongjohn' },
+			{ name: 'longanhuan_v3.6', value: 'longanhuan_v3.6' },
+		]);
+	});
+
+	it('returns an empty list for models without voices', () => {
+		expect(voicesToOptions(undefined)).toEqual([]);
+		expect(voicesToOptions([])).toEqual([]);
+	});
+});
 
 describe('matchesModality', () => {
 	it('keeps text models and drops speech and embedding rows from the text list', () => {

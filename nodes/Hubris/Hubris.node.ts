@@ -3,11 +3,12 @@ import type {
 	ILoadOptionsFunctions,
 	INodeExecutionData,
 	INodeListSearchResult,
+	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
-import { searchModels, searchVideoModels } from './lib/models';
+import { getVoicesForSelectedModel, searchModels, searchVideoModels } from './lib/models';
 import { accountOperations } from './descriptions/account';
 import { audioOperations, audioSpeechFields, audioTranscribeFields } from './descriptions/audio';
 import { embeddingsFields, embeddingsOperations } from './descriptions/embeddings';
@@ -83,6 +84,11 @@ export class Hubris implements INodeType {
 	};
 
 	methods = {
+		loadOptions: {
+			async getVoices(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				return getVoicesForSelectedModel(this);
+			},
+		},
 		listSearch: {
 			async searchTextModels(
 				this: ILoadOptionsFunctions,

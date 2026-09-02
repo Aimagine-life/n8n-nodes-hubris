@@ -22,6 +22,49 @@ function loadSupplyModel(): typeof SupplyModelFn | undefined {
 		return undefined;
 	}
 }
+
+interface OpenAiCompatibleOptions {
+	baseUrl: string;
+	apiKey: string;
+	model: string;
+	temperature?: number;
+	topP?: number;
+	maxTokens?: number;
+	frequencyPenalty?: number;
+	presencePenalty?: number;
+	reasoning?: { effort: ReasoningEffort };
+	timeout?: number;
+	maxRetries?: number;
+}
+
+/**
+ * Fallback for n8n < 2.20: those versions bundle `@langchain/openai` for their own
+ * OpenAI Chat Model node, and the AI Agent accepts a LangChain chat model directly.
+ * Resolved at runtime through n8n's module path, so it is not a dependency of this package.
+ */
+function supplyModelViaLangchain(options: OpenAiCompatibleOptions): SupplyData | undefined {
+	const dynamicRequire: NodeRequire = require;
+	let langchainOpenAi: { ChatOpenAI: new (fields: object) => unknown };
+	try {
+		langchainOpenAi = dynamicRequire('@langchain/openai') as typeof langchainOpenAi;
+	} catch {
+		return undefined;
+	}
+	const model = new langchainOpenAi.ChatOpenAI({
+		model: options.model,
+		apiKey: options.apiKey,
+		configuration: { baseURL: options.baseUrl },
+		temperature: options.temperature,
+		topP: options.topP,
+		maxTokens: options.maxTokens,
+		frequencyPenalty: options.frequencyPenalty,
+		presencePenalty: options.presencePenalty,
+		reasoning: options.reasoning,
+		timeout: options.timeout,
+		maxRetries: options.maxRetries,
+	});
+	return { response: model };
+}
 import { modelProperty } from '../Hubris/descriptions/shared';
 import { trimBaseUrl } from '../Hubris/lib/api';
 import { searchModels } from '../Hubris/lib/models';
@@ -161,14 +204,6 @@ export class LmChatHubris implements INodeType {
 	};
 
 	async supplyData(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData> {
-		const supplyModel = loadSupplyModel();
-		if (!supplyModel) {
-			throw new NodeOperationError(
-				this.getNode(),
-				'Hubris Chat Model requires n8n 2.20 or newer (it relies on @n8n/ai-node-sdk). On older versions use the built-in OpenAI Chat Model node with an OpenAI credential pointing at https://api.hubris.pw/v1.',
-				{ itemIndex },
-			);
-		}
 		const credentials = await this.getCredentials('hubrisApi');
 		const model = this.getNodeParameter('model', itemIndex, undefined, {
 			extractValue: true,
@@ -177,12 +212,10 @@ export class LmChatHubris implements INodeType {
 		const effort =
 			o.reasoningEffort && o.reasoningEffort !== 'default' ? o.reasoningEffort : undefined;
 
-		return supplyModel(this, {
-			type: 'openai',
+		const options: OpenAiCompatibleOptions = {
 			baseUrl: trimBaseUrl(String(credentials.baseUrl || 'https://api.hubris.pw/v1')),
 			apiKey: String(credentials.apiKey),
 			model,
-			defaultHeaders: { 'User-Agent': 'n8n-nodes-hubris' },
 			temperature: o.temperature !== undefined && o.temperature >= 0 ? o.temperature : undefined,
 			topP: o.topP !== undefined && o.topP >= 0 ? o.topP : undefined,
 			maxTokens: o.maxTokens !== undefined && o.maxTokens > 0 ? o.maxTokens : undefined,
@@ -191,6 +224,22 @@ export class LmChatHubris implements INodeType {
 			reasoning: effort ? { effort } : undefined,
 			timeout: o.timeout,
 			maxRetries: o.maxRetries,
-		});
+		};
+
+		const supplyModel = loadSupplyModel();
+		if (supplyModel) {
+			return supplyModel(this, {
+				type: 'openai',
+				...options,
+				defaultHeaders: { 'User-Agent': 'n8n-nodes-hubris' },
+			});
+		}
+		const fallback = supplyModelViaLangchain(options);
+		if (fallback) return fallback;
+		throw new NodeOperationError(
+			this.getNode(),
+			'Hubris Chat Model needs n8n 1.100 or newer. Alternatively use the built-in OpenAI Chat Model node with an OpenAI credential pointing at https://api.hubris.pw/v1.',
+			{ itemIndex },
+		);
 	}
 }

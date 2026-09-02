@@ -4,6 +4,7 @@ import type {
 	ILoadOptionsFunctions,
 	INodeListSearchItems,
 	INodeListSearchResult,
+	INodePropertyOptions,
 } from 'n8n-workflow';
 import { hubrisRequest } from './api';
 
@@ -82,6 +83,28 @@ export async function searchVideoModels(
 		path: '/videos/models',
 	});
 	return { results: toModelSearchItems(body.data, filter) };
+}
+
+export function voicesToOptions(voices: unknown): INodePropertyOptions[] {
+	if (!Array.isArray(voices)) return [];
+	return voices
+		.filter((v): v is string => typeof v === 'string' && v.length > 0)
+		.map((v) => ({ name: v, value: v }));
+}
+
+/** Voices of the speech model currently selected in the node (`supported_voices` from the catalog). */
+export async function getVoicesForSelectedModel(
+	ctx: ILoadOptionsFunctions,
+): Promise<INodePropertyOptions[]> {
+	const raw = ctx.getCurrentNodeParameter('model') as string | { value?: string } | undefined;
+	const modelId = typeof raw === 'string' ? raw : raw?.value;
+	if (!modelId) return [];
+	const body = await hubrisRequest<{ data: Array<CatalogModel & { supported_voices?: unknown }> }>(
+		ctx,
+		{ method: 'GET', path: '/models', qs: { output_modalities: 'speech' } },
+	);
+	const model = body.data.find((m) => m.id === modelId);
+	return voicesToOptions(model?.supported_voices);
 }
 
 export function getModelId(ctx: IExecuteFunctions, itemIndex: number): string {
