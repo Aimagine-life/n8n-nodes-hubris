@@ -1,4 +1,4 @@
-import { supplyModel } from '@n8n/ai-node-sdk';
+import type { supplyModel as SupplyModelFn } from '@n8n/ai-node-sdk';
 import type {
 	ILoadOptionsFunctions,
 	INodeListSearchResult,
@@ -7,7 +7,21 @@ import type {
 	ISupplyDataFunctions,
 	SupplyData,
 } from 'n8n-workflow';
-import { NodeConnectionTypes } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
+
+/**
+ * `@n8n/ai-node-sdk` ships with n8n 2.20+. It is resolved lazily so that on older
+ * instances the package still loads (the regular Hubris node keeps working) and only
+ * this sub-node reports a clear error when used.
+ */
+function loadSupplyModel(): typeof SupplyModelFn | undefined {
+	try {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		return (require('@n8n/ai-node-sdk') as { supplyModel: typeof SupplyModelFn }).supplyModel;
+	} catch {
+		return undefined;
+	}
+}
 import { modelProperty } from '../Hubris/descriptions/shared';
 import { trimBaseUrl } from '../Hubris/lib/api';
 import { searchModels } from '../Hubris/lib/models';
@@ -147,6 +161,14 @@ export class LmChatHubris implements INodeType {
 	};
 
 	async supplyData(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData> {
+		const supplyModel = loadSupplyModel();
+		if (!supplyModel) {
+			throw new NodeOperationError(
+				this.getNode(),
+				'Hubris Chat Model requires n8n 2.20 or newer (it relies on @n8n/ai-node-sdk). On older versions use the built-in OpenAI Chat Model node with an OpenAI credential pointing at https://api.hubris.pw/v1.',
+				{ itemIndex },
+			);
+		}
 		const credentials = await this.getCredentials('hubrisApi');
 		const model = this.getNodeParameter('model', itemIndex, undefined, {
 			extractValue: true,

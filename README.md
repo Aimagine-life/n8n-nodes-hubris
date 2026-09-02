@@ -15,7 +15,7 @@ Documentation in Russian: https://hubris.pw/docs/integrations/n8n
 
 **Self-hosted n8n:** go to *Settings → Community Nodes → Install*, enter `n8n-nodes-hubris` and confirm. To let AI Agents use the Hubris node as a tool on self-hosted instances, start n8n with `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true`.
 
-Requires n8n 1.100 or newer (Node.js 22).
+Requirements: n8n 1.100 or newer for the Hubris node; the Hubris Chat Model sub-node needs n8n 2.20 or newer (it relies on `@n8n/ai-node-sdk`, which ships with n8n). On older instances the sub-node reports this when used; the built-in OpenAI Chat Model node with an OpenAI credential pointing at `https://api.hubris.pw/v1` is the alternative.
 
 ## Credentials
 
