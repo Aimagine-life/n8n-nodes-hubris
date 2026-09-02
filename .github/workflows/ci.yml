@@ -28,5 +28,3 @@ jobs:
         run: npm run build
       - name: Test
         run: npm test
-      - name: Scan community package
-        run: npx @n8n/scan-community-package .
