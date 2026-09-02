@@ -23,6 +23,11 @@ function makeContext(params, items) {
 		getNode: () => node,
 		continueOnFail: () => false,
 		getCredentials: async () => ({ apiKey, baseUrl }),
+		// Stubs used by the LangChain tracing callback inside @n8n/ai-node-sdk.
+		addInputData: () => ({ index: 0 }),
+		addOutputData: () => undefined,
+		getExecutionCancelSignal: () => undefined,
+		logger: { debug() {}, info() {}, warn() {}, error() {} },
 		getNodeParameter(name, _i, fallback, opts) {
 			const v = params[name] ?? fallback;
 			if (opts?.extractValue && v && typeof v === 'object' && 'value' in v) return v.value;
@@ -32,7 +37,7 @@ function makeContext(params, items) {
 			async httpRequestWithAuthentication(_cred, o) {
 				const url = new URL(o.url);
 				for (const [k, val] of Object.entries(o.qs ?? {})) url.searchParams.set(k, String(val));
-				const res = await fetch(url, {
+				const init = {
 					method: o.method,
 					headers: {
 						...o.headers,
@@ -41,7 +46,21 @@ function makeContext(params, items) {
 					},
 					body: o.body !== undefined ? JSON.stringify(o.body) : undefined,
 					signal: AbortSignal.timeout(o.timeout ?? 300000),
-				});
+				};
+				// Local network flakiness (intermittent TLS drops) — retry transport errors only.
+				let res;
+				for (let attempt = 1; ; attempt++) {
+					try {
+						res = await fetch(url, init);
+						break;
+					} catch (error) {
+						const transient = /fetch failed|ETIMEDOUT|ECONNRESET|timeout/i;
+						if (attempt >= 4 || !transient.test(`${error.message} ${error.cause?.message ?? ''}`)) {
+							throw error;
+						}
+						await new Promise((r) => setTimeout(r, 1500 * attempt));
+					}
+				}
 				const headers = Object.fromEntries(res.headers.entries());
 				let body;
 				if (o.encoding === 'arraybuffer') body = Buffer.from(await res.arrayBuffer());
@@ -128,7 +147,7 @@ await run('embeddings.embed batch', {
 	resource: 'embeddings', operation: 'embed', model: model('openai/text-embedding-3-small'), input: '["hello","world"]', options: { dimensions: 64 },
 });
 const img = await run('image.generate', {
-	resource: 'image', operation: 'generate', model: model('google/gemini-2.5-flash-image'), prompt: 'a red cube on white background', options: {},
+	resource: 'image', operation: 'generate', model: model('black-forest-labs/flux.2-klein-4b'), prompt: 'a red cube on white background', options: { size: '512x512' },
 });
 if (img?.[0]?.binary?.data) {
 	writeFileSync('scripts/out/image.png', binaries.get(img[0].binary.data.id));

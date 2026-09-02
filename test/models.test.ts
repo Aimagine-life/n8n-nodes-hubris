@@ -1,5 +1,31 @@
 import { describe, expect, it } from 'vitest';
-import { toModelSearchItems } from '../nodes/Hubris/lib/models';
+import { matchesModality, toModelSearchItems } from '../nodes/Hubris/lib/models';
+
+describe('matchesModality', () => {
+	it('keeps text models and drops speech and embedding rows from the text list', () => {
+		expect(matchesModality({ id: 'a', output_modalities: ['text'] }, 'text')).toBe(true);
+		expect(matchesModality({ id: 'b', output_modalities: ['image', 'text'] }, 'text')).toBe(true);
+		expect(matchesModality({ id: 'c', output_modalities: ['speech'] }, 'text')).toBe(false);
+		expect(matchesModality({ id: 'd', output_modalities: ['embeddings'] }, 'text')).toBe(false);
+	});
+
+	it('keeps only image-only rows for the image list', () => {
+		expect(matchesModality({ id: 'a', output_modalities: ['image'] }, 'image')).toBe(true);
+		expect(matchesModality({ id: 'b', output_modalities: ['image', 'text'] }, 'image')).toBe(false);
+	});
+
+	it('describes per-unit pricing', () => {
+		const items = toModelSearchItems([
+			{
+				id: 'x/flux',
+				display_name: 'Flux',
+				output_modalities: ['image'],
+				pricing: { unit: 'image', per_unit: [{ sku: 'output_image', price_rub: 3.8, unit: 'megapixel' }] },
+			},
+		]);
+		expect(items[0].description).toBe('from 3.8 ₽/megapixel');
+	});
+});
 
 const models = [
 	{
