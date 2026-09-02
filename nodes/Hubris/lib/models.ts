@@ -26,7 +26,7 @@ function priceLabel(model: CatalogModel): string | undefined {
 		if (!p.input_rub_per_million && !p.output_rub_per_million) return 'free';
 		return `${p.input_rub_per_million} ₽/M in · ${p.output_rub_per_million} ₽/M out`;
 	}
-	const unit = p.per_unit?.find((u) => u.sku === 'output_image' || u.sku === 'video');
+	const unit = p.per_unit?.find((u) => u.sku === 'output_image') ?? p.per_unit?.[0];
 	if (unit && typeof unit.price_rub === 'number') return `from ${unit.price_rub} ₽/${unit.unit}`;
 	return undefined;
 }

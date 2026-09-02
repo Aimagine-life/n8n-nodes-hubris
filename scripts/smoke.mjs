@@ -122,7 +122,15 @@ async function listSearch(method, filter) {
 
 const model = (value) => ({ mode: 'id', value });
 const lmOnly = process.argv.includes('--lm-only');
+const videoOnly = process.argv.includes('--video-only');
 
+if (videoOnly) {
+	await run('video.generate', {
+		resource: 'video', operation: 'generate', model: model('bytedance/seedance-2.0-mini'), prompt: 'a paper boat floating on a calm pond, daylight', waitForCompletion: true,
+		options: { duration: 4, resolution: '480p', pollInterval: 10, timeoutMinutes: 15 },
+	});
+	process.exit(0);
+}
 if (!lmOnly) await run('account.getKey', { resource: 'account', operation: 'getKey' });
 if (lmOnly) {
 	// Skip the regular-node scenarios; only the Chat Model sub-node is exercised below.
