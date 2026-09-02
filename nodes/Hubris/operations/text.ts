@@ -114,7 +114,11 @@ export const chat: OperationHandler = async (ctx, i) => {
 	let messages: ChatMessage[];
 	if (mode === 'messages') {
 		const parsed = parseMessagesJson(ctx.getNodeParameter('messagesJson', i, '') as string);
-		if (parsed.error) throw new NodeOperationError(ctx.getNode(), parsed.error, { itemIndex: i });
+		if (!parsed.messages) {
+			throw new NodeOperationError(ctx.getNode(), parsed.error ?? 'Invalid messages', {
+				itemIndex: i,
+			});
+		}
 		messages = parsed.messages;
 	} else {
 		messages = buildChatMessages({

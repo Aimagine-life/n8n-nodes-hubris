@@ -8,13 +8,30 @@ import type {
 } from 'n8n-workflow';
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { searchModels, searchVideoModels } from './lib/models';
+import { accountOperations } from './descriptions/account';
+import { audioOperations, audioSpeechFields, audioTranscribeFields } from './descriptions/audio';
+import { embeddingsFields, embeddingsOperations } from './descriptions/embeddings';
+import { imageFields, imageOperations } from './descriptions/image';
 import { textChatFields, textOperations, textResponsesFields } from './descriptions/text';
+import { videoGenerateFields, videoGetFields, videoOperations } from './descriptions/video';
+import * as account from './operations/account';
+import * as audio from './operations/audio';
+import * as embeddings from './operations/embeddings';
+import * as image from './operations/image';
 import * as text from './operations/text';
 import type { OperationHandler } from './operations/types';
+import * as video from './operations/video';
 
 const operations: Record<string, OperationHandler> = {
+	'account.getKey': account.getKey,
+	'audio.speech': audio.speech,
+	'audio.transcribe': audio.transcribe,
+	'embeddings.embed': embeddings.embed,
+	'image.generate': image.generate,
 	'text.chat': text.chat,
 	'text.responses': text.responses,
+	'video.generate': video.generate,
+	'video.get': video.get,
 };
 
 export class Hubris implements INodeType {
@@ -38,12 +55,30 @@ export class Hubris implements INodeType {
 				name: 'resource',
 				type: 'options',
 				noDataExpression: true,
-				options: [{ name: 'Text', value: 'text' }],
+				options: [
+					{ name: 'Account', value: 'account' },
+					{ name: 'Audio', value: 'audio' },
+					{ name: 'Embedding', value: 'embeddings' },
+					{ name: 'Image', value: 'image' },
+					{ name: 'Text', value: 'text' },
+					{ name: 'Video', value: 'video' },
+				],
 				default: 'text',
 			},
 			textOperations,
 			...textChatFields,
 			...textResponsesFields,
+			embeddingsOperations,
+			...embeddingsFields,
+			imageOperations,
+			...imageFields,
+			audioOperations,
+			...audioTranscribeFields,
+			...audioSpeechFields,
+			videoOperations,
+			...videoGenerateFields,
+			...videoGetFields,
+			accountOperations,
 		],
 	};
 
