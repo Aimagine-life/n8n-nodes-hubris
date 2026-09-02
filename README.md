@@ -42,7 +42,7 @@ The credential test calls `GET /v1/key`, so a wrong or disabled key is reported 
 | Video | Get | Checks a job by ID and downloads the result. Videos are stored for 72 hours. |
 | Account | Get Key Info | `GET /key`: spending limit, usage in the current period, balance. |
 
-Every response that carries Hubris' `usage.cost` (kopecks) also gets a `cost_rub` field with the same amount in rubles.
+Every response that carries Hubris' `usage.cost` (kopecks) also gets a `cost_rub` field with the same amount in rubles. Image generation and speech responses carry no cost field; check the [usage log](https://hubris.pw/logs) for those.
 
 Models are picked from the live catalog (`GET /models`), filtered by the modality of the operation. Any model ID can also be given as an expression.
 

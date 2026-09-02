@@ -121,8 +121,12 @@ async function listSearch(method, filter) {
 }
 
 const model = (value) => ({ mode: 'id', value });
+const lmOnly = process.argv.includes('--lm-only');
 
-await run('account.getKey', { resource: 'account', operation: 'getKey' });
+if (!lmOnly) await run('account.getKey', { resource: 'account', operation: 'getKey' });
+if (lmOnly) {
+	// Skip the regular-node scenarios; only the Chat Model sub-node is exercised below.
+} else {
 for (const m of ['searchTextModels', 'searchEmbeddingModels', 'searchImageModels', 'searchTranscriptionModels', 'searchSpeechModels', 'searchVideoModels']) {
 	await listSearch(m, m === 'searchTextModels' ? 'haiku' : undefined);
 }
@@ -173,17 +177,19 @@ if (withVideo) {
 	});
 }
 
+}
+
 // Chat Model sub-node: supplyData returns a LangChain ChatOpenAI; invoke it once.
-try {
-	const ctx = makeContext({ model: model('anthropic/claude-haiku-4.5'), options: { maxTokens: 20 } }, []);
-	ctx.getNodeParameter = function (name, _i, fallback, opts) {
-		const v = { model: model('anthropic/claude-haiku-4.5'), options: { maxTokens: 20 } }[name] ?? fallback;
-		if (opts?.extractValue && v && typeof v === 'object' && 'value' in v) return v.value;
-		return v;
-	};
-	const { response } = await new LmChatHubris().supplyData.call(ctx, 0);
-	const answer = await response.invoke('Reply with the single word: pong');
-	console.log(`✅ lmChatHubris.supplyData → ${JSON.stringify(answer.content).slice(0, 80)}`);
-} catch (error) {
-	console.log(`❌ lmChatHubris: ${error.message}`);
+// Retried because the connect timeout of the OpenAI client (10 s) trips on flaky local links.
+for (let attempt = 1; attempt <= 3; attempt++) {
+	try {
+		const params = { model: model('anthropic/claude-haiku-4.5'), options: { maxTokens: 20, timeout: 60000, maxRetries: 0 } };
+		const ctx = makeContext(params, []);
+		const { response } = await new LmChatHubris().supplyData.call(ctx, 0);
+		const answer = await response.invoke('Reply with the single word: pong');
+		console.log(`✅ lmChatHubris.supplyData (attempt ${attempt}) → ${JSON.stringify(answer.content).slice(0, 80)}`);
+		break;
+	} catch (error) {
+		console.log(`❌ lmChatHubris (attempt ${attempt}): ${error.message}`);
+	}
 }
