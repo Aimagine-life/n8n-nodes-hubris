@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-hubris",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"publishConfig": { "access": "public" },
 	"description": "n8n nodes for Hubris — one API key for Claude, GPT, Gemini, DeepSeek and 400+ models: chat, images, audio, video, embeddings",
 	"license": "MIT",

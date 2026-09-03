@@ -126,8 +126,8 @@ const videoOnly = process.argv.includes('--video-only');
 
 if (videoOnly) {
 	await run('video.generate', {
-		resource: 'video', operation: 'generate', model: model('bytedance/seedance-2.0-mini'), prompt: 'a paper boat floating on a calm pond, daylight', waitForCompletion: true,
-		options: { duration: 4, resolution: '480p', pollInterval: 10, timeoutMinutes: 15 },
+		resource: 'video', operation: 'generate', model: model('bytedance/seedance-2.0-mini'), prompt: 'a paper boat floating on a calm pond, daylight',
+		options: { duration: 4, resolution: '480p' },
 	});
 	process.exit(0);
 }
@@ -179,10 +179,20 @@ if (speech?.[0]?.binary?.data) {
 	}, speech);
 }
 if (withVideo) {
-	await run('video.generate', {
-		resource: 'video', operation: 'generate', model: model('bytedance/seedance-1-lite'), prompt: 'a paper boat floating on a pond', waitForCompletion: true,
-		options: { duration: 5, pollInterval: 10, timeoutMinutes: 15 },
+	const job = await run('video.generate', {
+		resource: 'video', operation: 'generate', model: model('bytedance/seedance-1-lite'), prompt: 'a paper boat floating on a pond',
+		options: { duration: 5 },
 	});
+	// The node no longer waits: poll from here, exactly like a Wait + Get loop in a workflow.
+	const jobId = job?.[0]?.json?.id;
+	for (let i = 0; jobId && i < 40; i++) {
+		await new Promise((r) => setTimeout(r, 15000));
+		const got = await run(`video.get #${i + 1}`, {
+			resource: 'video', operation: 'get', videoId: jobId, options: {},
+		});
+		const status = got?.[0]?.json?.status;
+		if (status === 'completed' || status === 'failed') break;
+	}
 }
 
 }

@@ -38,8 +38,8 @@ The credential test calls `GET /v1/key`, so a wrong or disabled key is reported 
 | Image | Generate | `POST /images/generations`. Returns each picture as a binary field (`data` by default). |
 | Audio | Transcribe | `POST /audio/transcriptions`. Reads an audio file from a binary field (wav, mp3, flac, m4a, ogg, webm, aac). |
 | Audio | Generate Speech | `POST /audio/speech`. Returns an MP3 or PCM file in a binary field. |
-| Video | Generate | `POST /videos`, then polls `GET /videos/{id}` and downloads the MP4 when ready. Turn off *Wait for Completion* to get only the job ID. |
-| Video | Get | Checks a job by ID and downloads the result. Videos are stored for 72 hours. |
+| Video | Generate | `POST /videos`. Starts the job and returns its ID and status right away — the node never waits. |
+| Video | Get | Checks a job by ID and downloads the MP4 once `status` is `completed`. Videos are stored for 72 hours. |
 | Account | Get Key Info | `GET /key`: spending limit, usage in the current period, balance. |
 
 Every response that carries Hubris' `usage.cost` (kopecks) also gets a `cost_rub` field with the same amount in rubles. Image generation and speech responses carry no cost field; check the [usage log](https://hubris.pw/logs) for those.
@@ -60,6 +60,17 @@ Generate an article and a cover image, then post both to your CMS:
 2. **Hubris → Text → Chat** — model `openai/gpt-4o-mini`, Response Format *JSON Schema* with `{ "type": "object", "properties": { "prompt": { "type": "string" } }, "required": ["prompt"] }`, prompt `Describe a cover image for this article: {{ $json.text }}`.
 3. **Hubris → Image → Generate** — model `google/gemini-2.5-flash-image`, prompt `{{ $json.json.prompt }}`.
 4. Your CMS node — text from step 1, image from the `data` binary field of step 3.
+
+## Waiting for a video
+
+Video generation runs on the provider side and takes minutes, so the node never blocks the workflow. Build the wait yourself:
+
+1. **Hubris → Video → Generate** — returns `{ id, status: "pending" }`.
+2. **Wait** — 30 seconds.
+3. **Hubris → Video → Get** — Video ID `{{ $('Hubris').item.json.id }}`.
+4. **If** — `{{ $json.status }}` equals `completed`? Yes: continue, the MP4 is in the `data` binary field. No: back to the Wait node.
+
+The same job ID also works from another workflow or a later run, as long as it is fetched within 72 hours.
 
 ## Errors
 

@@ -13,25 +13,17 @@ export const videoOperations: INodeProperties = {
 		{
 			name: 'Generate',
 			value: 'generate',
-			action: 'Generate a video',
-			description: 'Create a video from a prompt and optional reference frames (/videos)',
+			action: 'Start a video generation job',
+			description: 'Start a job and return its ID. Check it later with the Get operation.',
 		},
 		{
 			name: 'Get',
 			value: 'get',
-			action: 'Get a video',
-			description: 'Check a video job and download the result when it is ready',
+			action: 'Get a video job',
+			description: 'Check a job by ID and download the result once it is ready',
 		},
 	],
 	default: 'generate',
-};
-
-const downloadOption: INodeProperties = {
-	displayName: 'Download Video',
-	name: 'download',
-	type: 'boolean',
-	default: true,
-	description: 'Whether to download the finished video into a binary field',
 };
 
 export const videoGenerateFields: INodeProperties[] = [
@@ -47,11 +39,11 @@ export const videoGenerateFields: INodeProperties[] = [
 		displayOptions: show('generate'),
 	},
 	{
-		displayName: 'Wait for Completion',
-		name: 'waitForCompletion',
-		type: 'boolean',
-		default: true,
-		description: 'Whether to wait until the video is ready. Otherwise only the job ID is returned.',
+		displayName:
+			'Generation takes a few minutes. This operation returns a job ID right away — add a Wait node and the Get operation to fetch the finished video.',
+		name: 'asyncNotice',
+		type: 'notice',
+		default: '',
 		displayOptions: show('generate'),
 	},
 	{
@@ -70,7 +62,6 @@ export const videoGenerateFields: INodeProperties[] = [
 				placeholder: '16:9',
 				description: 'Aspect ratio supported by the model',
 			},
-			downloadOption,
 			{
 				displayName: 'Duration (Seconds)',
 				name: 'duration',
@@ -115,15 +106,6 @@ export const videoGenerateFields: INodeProperties[] = [
 				description: 'HTTPS URL of the last-frame image. Ignored when the binary field is set.',
 			},
 			{
-				displayName: 'Poll Interval (Seconds)',
-				name: 'pollInterval',
-				type: 'number',
-				default: 10,
-				typeOptions: { minValue: 3 },
-				description: 'How often to check the job status while waiting',
-			},
-			binaryPropertyOutput('data'),
-			{
 				displayName: 'Resolution',
 				name: 'resolution',
 				type: 'string',
@@ -146,14 +128,6 @@ export const videoGenerateFields: INodeProperties[] = [
 				placeholder: '1280x720',
 				description: 'Exact frame size supported by the model',
 			},
-			{
-				displayName: 'Timeout (Minutes)',
-				name: 'timeoutMinutes',
-				type: 'number',
-				default: 15,
-				typeOptions: { minValue: 1 },
-				description: 'How long to wait for the video before failing. The job keeps running and can be fetched later.',
-			},
 		],
 	},
 ];
@@ -165,7 +139,8 @@ export const videoGetFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
-		description: 'Job ID returned by the Generate operation. Videos are stored for 72 hours after creation.',
+		description:
+			'Job ID returned by the Generate operation. Status is one of pending, in_progress, completed or failed. Videos are stored for 72 hours after creation.',
 		displayOptions: show('get'),
 	},
 	{
@@ -175,6 +150,15 @@ export const videoGetFields: INodeProperties[] = [
 		placeholder: 'Add Option',
 		default: {},
 		displayOptions: show('get'),
-		options: [downloadOption, binaryPropertyOutput('data')],
+		options: [
+			{
+				displayName: 'Download Video',
+				name: 'download',
+				type: 'boolean',
+				default: true,
+				description: 'Whether to download the finished video into a binary field',
+			},
+			binaryPropertyOutput('data'),
+		],
 	},
 ];
