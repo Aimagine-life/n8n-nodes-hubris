@@ -2,7 +2,7 @@
 	"node": "n8n-nodes-hubris.hubris",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["AI", "Communication"],
+	"categories": ["Utility", "Development"],
 	"resources": {
 		"credentialDocumentation": [{ "url": "https://hubris.pw/docs/integrations/n8n" }],
 		"primaryDocumentation": [{ "url": "https://hubris.pw/docs/integrations/n8n" }]

@@ -2,11 +2,7 @@
 	"node": "n8n-nodes-hubris.lmChatHubris",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["AI"],
-	"subcategories": {
-		"AI": ["Language Models", "Root Nodes"],
-		"Language Models": ["Chat Models (Recommended)"]
-	},
+	"categories": ["Utility"],
 	"resources": {
 		"credentialDocumentation": [{ "url": "https://hubris.pw/docs/integrations/n8n" }],
 		"primaryDocumentation": [{ "url": "https://hubris.pw/docs/integrations/n8n" }]
