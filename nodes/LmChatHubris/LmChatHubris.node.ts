@@ -23,6 +23,15 @@ function loadSupplyModel(): typeof SupplyModelFn | undefined {
 	}
 }
 
+/**
+ * Подпись узла в заголовках запроса. `User-Agent` доезжает до шлюза не всегда
+ * (в запасном пути через `ChatOpenAI` его перетирает HTTP-клиент библиотеки
+ * OpenAI, и в логах Hubris запрос выглядел как «axios» — замечено владельцем
+ * 09.09.2026 на боевом воркфлоу), поэтому дублируем имя в `X-Title`: этот
+ * заголовок клиенты OpenAI-совместимых шлюзов передают как есть.
+ */
+const CLIENT_HEADERS = { 'User-Agent': 'n8n-nodes-hubris', 'X-Title': 'n8n' } as const;
+
 interface OpenAiCompatibleOptions {
 	baseUrl: string;
 	apiKey: string;
@@ -53,7 +62,7 @@ function supplyModelViaLangchain(options: OpenAiCompatibleOptions): SupplyData |
 	const model = new langchainOpenAi.ChatOpenAI({
 		model: options.model,
 		apiKey: options.apiKey,
-		configuration: { baseURL: options.baseUrl },
+		configuration: { baseURL: options.baseUrl, defaultHeaders: { ...CLIENT_HEADERS } },
 		temperature: options.temperature,
 		topP: options.topP,
 		maxTokens: options.maxTokens,
@@ -231,7 +240,7 @@ export class LmChatHubris implements INodeType {
 			return supplyModel(this, {
 				type: 'openai',
 				...options,
-				defaultHeaders: { 'User-Agent': 'n8n-nodes-hubris' },
+				defaultHeaders: { ...CLIENT_HEADERS },
 			});
 		}
 		const fallback = supplyModelViaLangchain(options);

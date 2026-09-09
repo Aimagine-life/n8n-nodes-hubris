@@ -21,6 +21,12 @@ export interface HubrisRequestOptions {
 }
 
 const USER_AGENT = 'n8n-nodes-hubris';
+/**
+ * Имя приложения для колонки «Приложение» в логах Hubris. `User-Agent` до шлюза
+ * доезжает не всегда (HTTP-клиенты по пути его переписывают), `X-Title` —
+ * доезжает: это конвенция OpenAI-совместимых шлюзов.
+ */
+const CLIENT_TITLE = 'n8n';
 const DEFAULT_TIMEOUT_MS = 300_000;
 const DEFAULT_BASE_URL = 'https://api.hubris.pw/v1';
 
@@ -73,7 +79,7 @@ export async function hubrisRequest<T = IDataObject>(
 	const requestOptions: IHttpRequestOptions = {
 		method: options.method,
 		url: `${await baseUrlOf(ctx)}${options.path}`,
-		headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+		headers: { 'User-Agent': USER_AGENT, 'X-Title': CLIENT_TITLE, Accept: 'application/json' },
 		json: true,
 		returnFullResponse: true,
 		ignoreHttpStatusErrors: true,
@@ -100,7 +106,7 @@ export async function hubrisRequestBinary(
 	const requestOptions: IHttpRequestOptions = {
 		method: options.method,
 		url: `${await baseUrlOf(ctx)}${options.path}`,
-		headers: { 'User-Agent': USER_AGENT },
+		headers: { 'User-Agent': USER_AGENT, 'X-Title': CLIENT_TITLE },
 		json: options.body !== undefined,
 		encoding: 'arraybuffer',
 		returnFullResponse: true,
