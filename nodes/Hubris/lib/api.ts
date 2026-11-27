@@ -23,9 +23,9 @@ export interface HubrisRequestOptions {
 
 const USER_AGENT = 'n8n-nodes-hubris';
 /**
- * Имя приложения для колонки «Приложение» в логах Hubris. `User-Agent` до шлюза
- * доезжает не всегда (HTTP-клиенты по пути его переписывают), `X-Title` —
- * доезжает: это конвенция OpenAI-совместимых шлюзов.
+ * App name shown in the "App" column of Hubris usage logs. `User-Agent` does not
+ * always reach the gateway (HTTP clients along the way may rewrite it), while
+ * `X-Title` does: it is the convention of OpenAI-compatible gateways.
  */
 const CLIENT_TITLE = 'n8n';
 const DEFAULT_TIMEOUT_MS = 300_000;

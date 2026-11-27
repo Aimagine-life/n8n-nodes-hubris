@@ -24,11 +24,10 @@ function loadSupplyModel(): typeof SupplyModelFn | undefined {
 }
 
 /**
- * Подпись узла в заголовках запроса. `User-Agent` доезжает до шлюза не всегда
- * (в запасном пути через `ChatOpenAI` его перетирает HTTP-клиент библиотеки
- * OpenAI, и в логах Hubris запрос выглядел как «axios» — замечено владельцем
- * 09.09.2026 на боевом воркфлоу), поэтому дублируем имя в `X-Title`: этот
- * заголовок клиенты OpenAI-совместимых шлюзов передают как есть.
+ * Client identification headers. `User-Agent` does not always reach the gateway
+ * (on the `ChatOpenAI` fallback path the OpenAI library's HTTP client overwrites it,
+ * and Hubris logs showed such requests as "axios"), so the name is repeated in
+ * `X-Title`, which clients of OpenAI-compatible gateways pass through unchanged.
  */
 const CLIENT_HEADERS = { 'User-Agent': 'n8n-nodes-hubris', 'X-Title': 'n8n' } as const;
 

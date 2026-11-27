@@ -1,8 +1,8 @@
-/** Адрес API Hubris по умолчанию с версии 0.2.0. */
+/** Default Hubris API endpoint since 0.2.0. */
 export const BASE_URL_CURRENT = 'https://api.hubris.pro/v1';
-/** Прежний адрес: на нём сохранены учётные данные версий до 0.2.0. */
+/** Previous endpoint, the default of credentials saved before 0.2.0. It keeps working. */
 export const BASE_URL_LEGACY = 'https://api.hubris.pw/v1';
-/** Значение выпадающего списка, при котором адрес берётся из поля `customBaseUrl`. */
+/** Dropdown value that makes the endpoint come from the `customBaseUrl` field. */
 export const BASE_URL_CUSTOM = 'custom';
 
 export function trimBaseUrl(url: string): string {
@@ -10,9 +10,9 @@ export function trimBaseUrl(url: string): string {
 }
 
 /**
- * Адрес API из учётных данных `hubrisApi`. До 0.2.0 `baseUrl` было свободной строкой,
- * поэтому любое значение, кроме `custom`, используется как адрес: сохранённые прокси
- * и стенды продолжают работать без пересохранения.
+ * API endpoint from the `hubrisApi` credentials. Before 0.2.0 `baseUrl` was a free-form
+ * string, so any value other than `custom` is used as the endpoint itself: saved proxy
+ * and staging URLs keep working without re-saving the credentials.
  */
 export function resolveBaseUrl(credentials: {
 	baseUrl?: unknown;
