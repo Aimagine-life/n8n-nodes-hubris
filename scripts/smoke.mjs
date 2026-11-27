@@ -10,7 +10,7 @@ const { LmChatHubris } = require('../dist/nodes/LmChatHubris/LmChatHubris.node.j
 
 const apiKey = process.env.HUBRIS_API_KEY;
 if (!apiKey) throw new Error('HUBRIS_API_KEY is required');
-const baseUrl = process.env.HUBRIS_BASE_URL ?? 'https://api.hubris.pw/v1';
+const baseUrl = process.env.HUBRIS_BASE_URL ?? 'https://api.hubris.pro/v1';
 const withVideo = process.argv.includes('--video');
 mkdirSync('scripts/out', { recursive: true });
 
