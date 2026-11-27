@@ -75,7 +75,7 @@ function supplyModelViaLangchain(options: OpenAiCompatibleOptions): SupplyData |
 	return { response: model };
 }
 import { modelProperty } from '../Hubris/descriptions/shared';
-import { trimBaseUrl } from '../Hubris/lib/api';
+import { BASE_URL_CURRENT, resolveBaseUrl } from '../Hubris/lib/base-url';
 import { searchModels } from '../Hubris/lib/models';
 
 type ReasoningEffort = 'none' | 'minimal' | 'low' | 'medium' | 'high';
@@ -109,7 +109,7 @@ export class LmChatHubris implements INodeType {
 				'Language Models': ['Chat Models (Recommended)'],
 			},
 			resources: {
-				primaryDocumentation: [{ url: 'https://hubris.pw/docs/integrations/n8n' }],
+				primaryDocumentation: [{ url: 'https://hubris.pro/docs/integrations/n8n' }],
 			},
 		},
 		inputs: [],
@@ -222,7 +222,7 @@ export class LmChatHubris implements INodeType {
 			o.reasoningEffort && o.reasoningEffort !== 'default' ? o.reasoningEffort : undefined;
 
 		const options: OpenAiCompatibleOptions = {
-			baseUrl: trimBaseUrl(String(credentials.baseUrl || 'https://api.hubris.pw/v1')),
+			baseUrl: resolveBaseUrl(credentials),
 			apiKey: String(credentials.apiKey),
 			model,
 			temperature: o.temperature !== undefined && o.temperature >= 0 ? o.temperature : undefined,
@@ -247,7 +247,7 @@ export class LmChatHubris implements INodeType {
 		if (fallback) return fallback;
 		throw new NodeOperationError(
 			this.getNode(),
-			'Hubris Chat Model needs n8n 1.100 or newer. Alternatively use the built-in OpenAI Chat Model node with an OpenAI credential pointing at https://api.hubris.pw/v1.',
+			`Hubris Chat Model needs n8n 1.100 or newer. Alternatively use the built-in OpenAI Chat Model node with an OpenAI credential pointing at ${BASE_URL_CURRENT}.`,
 			{ itemIndex },
 		);
 	}

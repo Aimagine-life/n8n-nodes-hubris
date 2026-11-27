@@ -4,7 +4,7 @@
 	"codexVersion": "1.0",
 	"categories": ["Utility"],
 	"resources": {
-		"credentialDocumentation": [{ "url": "https://hubris.pw/docs/integrations/n8n" }],
-		"primaryDocumentation": [{ "url": "https://hubris.pw/docs/integrations/n8n" }]
+		"credentialDocumentation": [{ "url": "https://hubris.pro/docs/integrations/n8n" }],
+		"primaryDocumentation": [{ "url": "https://hubris.pro/docs/integrations/n8n" }]
 	}
 }
