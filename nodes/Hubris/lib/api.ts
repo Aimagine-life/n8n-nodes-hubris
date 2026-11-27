@@ -8,6 +8,7 @@ import type {
 	JsonObject,
 } from 'n8n-workflow';
 import { NodeApiError } from 'n8n-workflow';
+import { resolveBaseUrl } from './base-url';
 
 export type HubrisContext = IExecuteFunctions | ILoadOptionsFunctions;
 
@@ -28,11 +29,6 @@ const USER_AGENT = 'n8n-nodes-hubris';
  */
 const CLIENT_TITLE = 'n8n';
 const DEFAULT_TIMEOUT_MS = 300_000;
-const DEFAULT_BASE_URL = 'https://api.hubris.pw/v1';
-
-export function trimBaseUrl(url: string): string {
-	return url.replace(/\/+$/, '');
-}
 
 function isApiErrorBody(
 	body: unknown,
@@ -63,7 +59,7 @@ export function toApiError(node: INode, statusCode: number, body: unknown): Node
 
 async function baseUrlOf(ctx: HubrisContext): Promise<string> {
 	const credentials = await ctx.getCredentials('hubrisApi');
-	return trimBaseUrl(String(credentials.baseUrl || DEFAULT_BASE_URL));
+	return resolveBaseUrl(credentials);
 }
 
 interface FullResponse<T> {

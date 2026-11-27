@@ -1,13 +1,13 @@
 # n8n-nodes-hubris
 
-Official [n8n](https://n8n.io) community nodes for [Hubris](https://hubris.pw) — one API key for Claude, GPT, Gemini, DeepSeek and 400+ other models, paid in rubles.
+Official [n8n](https://n8n.io) community nodes for [Hubris](https://hubris.pro) — one API key for Claude, GPT, Gemini, DeepSeek and 400+ other models, paid in rubles.
 
 The package ships two nodes:
 
 - **Hubris** — a regular node with text, image, audio, video, embedding and account operations. Can be used as a tool by AI Agents.
 - **Hubris Chat Model** — a sub-node that plugs any text model from the Hubris catalog into the AI Agent, chains and other LangChain-style nodes.
 
-Documentation in Russian: https://hubris.pw/docs/integrations/n8n
+Documentation in Russian: https://hubris.pro/docs/integrations/n8n
 
 ## Installation
 
@@ -23,8 +23,8 @@ Create a **Hubris API** credential:
 
 | Field | Value |
 | --- | --- |
-| API Key | an inference key from https://hubris.pw/keys (starts with `sk-gw-`) |
-| Base URL | `https://api.hubris.pw/v1` (change only for a proxy or staging) |
+| API Key | an inference key from https://hubris.pro/keys (starts with `sk-gw-`) |
+| Base URL | **Hubris (api.hubris.pro)** — the default; **Hubris Legacy (api.hubris.pw)** — the previous endpoint, still working; **Custom** — a proxy or staging URL |
 
 The credential test calls `GET /v1/key`, so a wrong or disabled key is reported right away.
 
@@ -42,7 +42,7 @@ The credential test calls `GET /v1/key`, so a wrong or disabled key is reported 
 | Video | Get | Checks a job by ID and downloads the MP4 once `status` is `completed`. Videos are stored for 72 hours. |
 | Account | Get Key Info | `GET /key`: spending limit, usage in the current period, balance. |
 
-Every response that carries Hubris' `usage.cost` (kopecks) also gets a `cost_rub` field with the same amount in rubles. Image generation and speech responses carry no cost field; check the [usage log](https://hubris.pw/logs) for those.
+Every response that carries Hubris' `usage.cost` (kopecks) also gets a `cost_rub` field with the same amount in rubles. Image generation and speech responses carry no cost field; check the [usage log](https://hubris.pro/logs) for those.
 
 Models are picked from the live catalog (`GET /models`), filtered by the modality of the operation. Any model ID can also be given as an expression.
 
@@ -50,7 +50,7 @@ Models are picked from the live catalog (`GET /models`), filtered by the modalit
 
 Add **Hubris Chat Model** to an AI Agent, Basic LLM Chain or any node with a *Model* input, pick a model from the catalog and connect the credential. Options cover temperature, top-p, penalties, max tokens, reasoning effort, timeout and retries. Temperature and top-p are sent only when set explicitly: Claude 5 models reject them.
 
-For vector stores use the built-in **Embeddings OpenAI** sub-node with an *OpenAI* credential pointing at `https://api.hubris.pw/v1` and your Hubris key.
+For vector stores use the built-in **Embeddings OpenAI** sub-node with an *OpenAI* credential pointing at `https://api.hubris.pro/v1` and your Hubris key.
 
 ## Example workflow
 

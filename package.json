@@ -1,10 +1,10 @@
 {
 	"name": "n8n-nodes-hubris",
-	"version": "0.1.7",
+	"version": "0.2.0",
 	"publishConfig": { "access": "public" },
 	"description": "n8n nodes for Hubris — one API key for Claude, GPT, Gemini, DeepSeek and 400+ models: chat, images, audio, video, embeddings",
 	"license": "MIT",
-	"homepage": "https://hubris.pw/docs/integrations/n8n",
+	"homepage": "https://hubris.pro/docs/integrations/n8n",
 	"keywords": ["n8n-community-node-package", "n8n", "hubris", "llm", "openai", "claude", "gemini", "ai"],
 	"author": { "name": "Hubris", "email": "support@hubris.pw" },
 	"repository": { "type": "git", "url": "https://github.com/Aimagine-life/n8n-nodes-hubris.git" },
