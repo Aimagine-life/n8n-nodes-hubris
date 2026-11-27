@@ -31,11 +31,11 @@ r = await api('GET', '/types/nodes.json');
 const hubrisNodes = Array.isArray(r.json) ? r.json.filter((n) => /hubris/i.test(n.name)) : [];
 console.log('registered nodes:', hubrisNodes.map((n) => `${n.name} (${n.displayName})`).join(', ') || JSON.stringify(r.json).slice(0, 200));
 
-r = await api('POST', '/rest/credentials', { name: 'Hubris smoke 2', type: 'hubrisApi', data: { apiKey, baseUrl: 'https://api.hubris.pw/v1' } });
+r = await api('POST', '/rest/credentials', { name: 'Hubris smoke 2', type: 'hubrisApi', data: { apiKey, baseUrl: 'https://api.hubris.pro/v1' } });
 console.log('credential', r.status, r.json?.data?.id ?? JSON.stringify(r.json).slice(0, 200));
 const credId = r.json?.data?.id;
 
-r = await api('POST', '/rest/credentials/test', { credentials: { id: credId, name: 'Hubris smoke 2', type: 'hubrisApi', data: { apiKey, baseUrl: 'https://api.hubris.pw/v1' } } });
+r = await api('POST', '/rest/credentials/test', { credentials: { id: credId, name: 'Hubris smoke 2', type: 'hubrisApi', data: { apiKey, baseUrl: 'https://api.hubris.pro/v1' } } });
 console.log('credential test', r.status, JSON.stringify(r.json).slice(0, 200));
 
 const hubrisNode = (name, params, pos) => ({
