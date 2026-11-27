@@ -7,7 +7,7 @@
 	"homepage": "https://hubris.pro/docs/integrations/n8n",
 	"keywords": ["n8n-community-node-package", "n8n", "hubris", "llm", "openai", "claude", "gemini", "ai"],
 	"author": { "name": "Hubris", "email": "support@hubris.pw" },
-	"repository": { "type": "git", "url": "https://github.com/Aimagine-life/n8n-nodes-hubris.git" },
+	"repository": { "type": "git", "url": "https://github.com/wildbots-dev/n8n-nodes-hubris.git" },
 	"engines": { "node": ">=22" },
 	"scripts": {
 		"build": "n8n-node build",
